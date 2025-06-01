@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState, useRef } from "react"
 
 function App() {
 
@@ -6,6 +6,10 @@ function App() {
   const [numberAllowed, setNumberAllowed] = useState(false);
   const [charAllowed, setCharAllowed] = useState(false);
   const [password, setPassword] = useState("");
+
+  // useRef
+
+  const passwordRef = useRef(null);
 
   const passwordGenerator = useCallback(() => {
     let pass = "";
@@ -20,12 +24,23 @@ function App() {
 
     for (let i = 1; i <= length; i++) {
       let char = Math.floor(Math.random() * str.length + 1);
-      pass = str.charAt(char);
+      pass += str.charAt(char);
     }
 
     setPassword(pass);
 
-  }, [length, numberAllowed, charAllowed, setPassword])
+  }, [length, numberAllowed, charAllowed, setPassword]);
+
+
+  const passwordCopy = () => {
+    passwordRef.current.select();
+    passwordRef.current?.setSelectionRange(0 , 10)
+    window.navigator.clipboard()
+  }
+
+  useEffect(() => {
+    passwordGenerator();
+  }, [length, numberAllowed, charAllowed, passwordGenerator]);
 
   return (
     <>
@@ -39,9 +54,12 @@ function App() {
             className="outline-none w-full py-1 px-3 bg-white"
             placeholder="Password"
             readOnly
+            ref={passwordRef}
           />
           <button
-            className="outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0"
+            onClick={passwordCopy}
+            className="outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0 
+            cursor-pointer hover:bg-blue-600"
           >Copy</button>
         </div>
         <div className="flex text-sm gap-x-3 mt-3">
@@ -73,7 +91,7 @@ function App() {
               id="charInp"
               defaultChecked={charAllowed}
               onChange={() => {
-                setNumberAllowed((prev) => !prev)
+                setCharAllowed((prev) => !prev)
               }}
             />
             <label htmlFor="charInp">Characters</label>
